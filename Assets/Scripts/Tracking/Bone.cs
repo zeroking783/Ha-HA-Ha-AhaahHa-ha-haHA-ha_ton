@@ -11,10 +11,12 @@ public class Bone : MonoBehaviour
     [SerializeField] private Transform[] drawRayTo;
     public void Update()
     {
-        transform.position = Vector3.Lerp(transform.position, position, 1*Time.deltaTime);
-        foreach (var item in drawRayTo)
-        {
-            Debug.DrawLine(transform.position, item.position, Color.red);
-        }
+        transform.position = Vector3.Lerp(transform.position, position, 10*Time.deltaTime);
+
+        GetComponent<MeshRenderer>().enabled = visibility > 0.01f;
+        // foreach (var item in drawRayTo)
+        // {
+        //     Debug.DrawLine(transform.position, item.position, Color.red);
+        // }
     }
 }

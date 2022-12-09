@@ -35,7 +35,7 @@ public class WebCamPhotoCamera : MonoBehaviour
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
-            timer = 0.5f;
+            timer = 0.2f;
             
             
             Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
@@ -79,15 +79,18 @@ public class WebCamPhotoCamera : MonoBehaviour
         string[] pointsArray = points.Split(';');
 
         //разбить полученные строки по пробелам
-        for(int i = 0; i < bonesArray.Length; i++)
+        for(int i = 0; i < pointsArray.Length; i++)
         {
             string[] pointArray = pointsArray[i].Split(' ');
             if (pointArray.Length < 5) continue;
             // преобразовать в структуру
-            bonesArray[i].id = int.Parse(pointArray[0]);
-            bonesArray[i].position =
-                new Vector3(toFloat(pointArray[1]), toFloat(pointArray[2]),0) * 11;
-            bonesArray[i].visibility = toFloat(pointArray[4]);
+            if (i < bonesArray.Length)
+            {
+                bonesArray[i].id = int.Parse(pointArray[0]);
+                bonesArray[i].position =
+                    new Vector3(toFloat(pointArray[1]), -toFloat(pointArray[2]), 0) * 11;
+                bonesArray[i].visibility = toFloat(pointArray[4]);
+            }
         }
     }
 
