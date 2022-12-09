@@ -7,19 +7,26 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NetMQ;
 using NetMQ.Sockets;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 public class WebCamPhotoCamera : MonoBehaviour
 {
     WebCamTexture webCamTexture;
     private RenderTexture videoTexture;
-    public Bone[] bonesArray;
+    [FormerlySerializedAs("bonesArray")] public Bone[] bonesArrayWebcam;
+    public Bone[] bonesArrayVideo;
     private float timer = 0.5f;
-    private ZeroMQInstance zmqInstance;
+    private bool flazho4ek = false;
+    private ZeroMQInstance zmqInstanceWebcam;
+    private ZeroMQInstance zmqInstanceVideo;
     
     void Start()
     {
-        zmqInstance = new ZeroMQInstance(GetPoints, 5555);
-        zmqInstance.Start();
+        zmqInstanceWebcam = new ZeroMQInstance(GetPointsWebcam, 5555);
+        zmqInstanceWebcam.Start();
+        zmqInstanceVideo = new ZeroMQInstance(GetPointsVideo, 5556);
+        zmqInstanceVideo.Start();
         webCamTexture = new WebCamTexture();
         
         //Set resolurion to webCamTexture
@@ -38,18 +45,28 @@ public class WebCamPhotoCamera : MonoBehaviour
         if (timer <= 0)
         {
             timer = 0.2f;
-            
-            
-            Texture2D tex = new Texture2D(videoTexture.width, videoTexture.height, TextureFormat.RGB24, false);
-            // ReadPixels looks at the active RenderTexture.
-            RenderTexture.active = videoTexture;
-            tex.ReadPixels(new Rect(0, 0, videoTexture.width,videoTexture.height), 0, 0);
-            tex.Apply(); 
-            
-            byte[] bytes = tex.EncodeToPNG();
 
-            //отправить по сокету
-            zmqInstance.Send(bytes);
+            if (flazho4ek)
+            {
+                //получить с вебкамеры байты
+                Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
+                photo.SetPixels(webCamTexture.GetPixels());
+                photo.Apply();
+                byte[] bytes = photo.EncodeToPNG();
+    
+                //отправить по сокету
+                zmqInstanceWebcam.Send(bytes);
+            }
+            else
+            {
+                //преобразовать videoteхture в texture2d
+                Texture2D photo = new Texture2D(videoTexture.width, videoTexture.height);
+                RenderTexture.active = videoTexture;
+                photo.ReadPixels(new Rect(0, 0, videoTexture.width, videoTexture.height), 0, 0);
+                photo.Apply();
+                byte[] bytes = photo.EncodeToPNG();
+                zmqInstanceWebcam.Send(bytes);
+            }
 
         }
     }
@@ -57,7 +74,8 @@ public class WebCamPhotoCamera : MonoBehaviour
     public void OnDisable()
     {
      
-        zmqInstance.Stop();
+        zmqInstanceWebcam.Stop();
+        zmqInstanceVideo.Stop();
         print("QUIT");
     }
     // async Task<bool> ToPhoto()
@@ -78,7 +96,7 @@ public class WebCamPhotoCamera : MonoBehaviour
     // }
 
 
-    void GetPoints(string points)
+    void GetPointsWebcam(string points)
     {
         //разделить строку по разделителю ;
         string[] pointsArray = points.Split(';');
@@ -89,12 +107,33 @@ public class WebCamPhotoCamera : MonoBehaviour
             string[] pointArray = pointsArray[i].Split(' ');
             if (pointArray.Length < 5) continue;
             // преобразовать в структуру
-            if (i < bonesArray.Length)
+            if (i < bonesArrayWebcam.Length)
             {
-                bonesArray[i].id = int.Parse(pointArray[0]);
-                bonesArray[i].position =
+                bonesArrayWebcam[i].id = int.Parse(pointArray[0]);
+                bonesArrayWebcam[i].position =
                     new Vector3(toFloat(pointArray[1]), -toFloat(pointArray[2]), 0) * 11;
-                bonesArray[i].visibility = toFloat(pointArray[4]);
+                bonesArrayWebcam[i].visibility = toFloat(pointArray[4]);
+            }
+        }
+    }
+    
+    void GetPointsVideo(string points)
+    {
+        //разделить строку по разделителю ;
+        string[] pointsArray = points.Split(';');
+
+        //разбить полученные строки по пробелам
+        for(int i = 0; i < pointsArray.Length; i++)
+        {
+            string[] pointArray = pointsArray[i].Split(' ');
+            if (pointArray.Length < 5) continue;
+            // преобразовать в структуру
+            if (i < bonesArrayVideo.Length)
+            {
+                bonesArrayVideo[i].id = int.Parse(pointArray[0]);
+                bonesArrayVideo[i].position =
+                    new Vector3(toFloat(pointArray[1]), -toFloat(pointArray[2]), 0) * 11;
+                bonesArrayVideo[i].visibility = toFloat(pointArray[4]);
             }
         }
     }
