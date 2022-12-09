@@ -8,7 +8,7 @@ using NetMQ;
 using NetMQ.Sockets;
 using UnityEngine;
 
-public class ZeroMQInstance: MonoBehaviour
+public class ZeroMQInstance
 {
     private Thread _thread;
     private byte[] _data = null;
@@ -19,14 +19,14 @@ public class ZeroMQInstance: MonoBehaviour
     
     public ZeroMQInstance(Action<string> callback)
     {
-        run_cmd();
+        //run_cmd();
         
         _thread =  new Thread(() =>
         {
             using (var socket = new RequestSocket())
             {
 
-                while (pythonRunning)
+                while (!pythonRunning)
                 {
                     socket.Connect("tcp://localhost:5555");
 
@@ -51,18 +51,11 @@ public class ZeroMQInstance: MonoBehaviour
         _isRunning = true;
         _thread.Start();
     }
-
-    public void OnDisable()
-    {
-        Stop();
-        print("QUIT");
-    }
-
+    
     public void Stop()
     {
         _isRunning = false;
-        _thread.Join();
-        _process.Close();
+       _thread.Interrupt();
     }
     
     public void Send(byte[] data)
@@ -85,7 +78,7 @@ public class ZeroMQInstance: MonoBehaviour
             _process.Start();
             
             pythonRunning = true;
-            print("File runned");
+            
             
         }
 }

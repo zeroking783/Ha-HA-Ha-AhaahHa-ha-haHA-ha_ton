@@ -22,8 +22,8 @@ public class WebCamPhotoCamera : MonoBehaviour
         webCamTexture = new WebCamTexture();
         
         //Set resolurion to webCamTexture
-        webCamTexture.requestedHeight = 100;
-        webCamTexture.requestedWidth = 100;
+        webCamTexture.requestedHeight = 500;
+        webCamTexture.requestedWidth = 500;
         
         GetComponent<Renderer>().material.mainTexture =
             webCamTexture; //Add Mesh Renderer to the GameObject to which this script is attached to
@@ -49,6 +49,12 @@ public class WebCamPhotoCamera : MonoBehaviour
         }
     }
 
+    public void OnDisable()
+    {
+     
+        zmqInstance.Stop();
+        print("QUIT");
+    }
     // async Task<bool> ToPhoto()
     // {
     //     Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
