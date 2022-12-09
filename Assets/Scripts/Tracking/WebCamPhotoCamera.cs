@@ -17,12 +17,10 @@ public class WebCamPhotoCamera : MonoBehaviour
     [FormerlySerializedAs("bonesArray")] public Bone[] bonesArrayWebcam;
     public Bone[] bonesArrayVideo;
     private float timer = 0.5f;
-    private float pointCalculationTimer = 1f;
     private bool flazho4ek = false;
     private ZeroMQInstance zmqInstanceWebcam;
     private ZeroMQInstance zmqInstanceVideo;
-    [SerializeField] private float acceptDistance = 0.1f;
-    
+
     void Start()
     {
         zmqInstanceWebcam = new ZeroMQInstance(GetPointsWebcam, 5555);
@@ -71,23 +69,7 @@ public class WebCamPhotoCamera : MonoBehaviour
             }
         }
 
-        pointCalculationTimer -= Time.deltaTime;
-        if (pointCalculationTimer <= 0)
-        {
-            pointCalculationTimer = 1f;
-            int correntPoints = 0;
-            for (int i = 0; i < bonesArrayVideo.Length; i++)
-            {
-                Bone webcamBone = bonesArrayWebcam[i];
-                Bone videoBone = bonesArrayVideo[i];
-                if (Vector3.Distance(webcamBone.transform.position, videoBone.transform.position) < acceptDistance)
-                {
-                    correntPoints++;
-                }
-            }
-            float correntPercent = (float) correntPoints / bonesArrayVideo.Length * 100;
-            Debug.Log(correntPercent);
-        }
+        
     }
 
     public void OnDisable()
