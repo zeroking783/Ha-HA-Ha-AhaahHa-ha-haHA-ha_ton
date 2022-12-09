@@ -1,4 +1,4 @@
-using System;
+ using System;
 using UnityEngine;
 using System.Collections;
 using System.IO;
@@ -12,15 +12,16 @@ using UnityEngine.UI;
 
 public class WebCamPhotoCamera : MonoBehaviour
 {
+    public Renderer PlayerScreen;
     WebCamTexture webCamTexture;
-    private RenderTexture videoTexture;
+    public RenderTexture videoTexture;
     [FormerlySerializedAs("bonesArray")] public Bone[] bonesArrayWebcam;
     public Bone[] bonesArrayVideo;
     private float timer = 0.5f;
     private bool flazho4ek = false;
     private ZeroMQInstance zmqInstanceWebcam;
     private ZeroMQInstance zmqInstanceVideo;
-
+    
     void Start()
     {
         zmqInstanceWebcam = new ZeroMQInstance(GetPointsWebcam, 5555);
@@ -34,17 +35,18 @@ public class WebCamPhotoCamera : MonoBehaviour
         webCamTexture.requestedWidth = 500;
         //Set resolution to videoTexture
         
-        GetComponent<Renderer>().material.mainTexture =
+        PlayerScreen.material.mainTexture =
             webCamTexture; //Add Mesh Renderer to the GameObject to which this script is attached to
         webCamTexture.Play();
     }
 
+    public void p(string f) => f += '1';
     void LateUpdate()
     {
         timer -= Time.deltaTime;
         if (timer <= 0)
         {
-            timer = 0.2f;
+            timer = 0.1f;
 
             if (flazho4ek)
             {
@@ -60,16 +62,19 @@ public class WebCamPhotoCamera : MonoBehaviour
             else
             {
                 //преобразовать videoteхture в texture2d
-                Texture2D photo = new Texture2D(videoTexture.width, videoTexture.height);
-                RenderTexture.active = videoTexture;
-                photo.ReadPixels(new Rect(0, 0, videoTexture.width, videoTexture.height), 0, 0);
-                photo.Apply();
-                byte[] bytes = photo.EncodeToPNG();
-                zmqInstanceWebcam.Send(bytes);
-            }
-        }
+                Texture2D ph = new Texture2D(videoTexture.width, videoTexture.height);
 
-        
+                RenderTexture rend = new RenderTexture(videoTexture.width, videoTexture.height, 24);
+                Graphics.Blit(videoTexture, rend);
+                ph.ReadPixels(new Rect(0, 0, rend.width, rend.height), 0, 0);
+                ph.Apply();
+                byte[] bytes = ph.EncodeToPNG();
+                zmqInstanceVideo.Send(bytes);
+            }
+
+            flazho4ek = !flazho4ek;
+
+        }
     }
 
     public void OnDisable()
@@ -99,8 +104,10 @@ public class WebCamPhotoCamera : MonoBehaviour
 
     void GetPointsWebcam(string points)
     {
+        print("PLAYER");
         //разделить строку по разделителю ;
         string[] pointsArray = points.Split(';');
+
 
         //разбить полученные строки по пробелам
         for(int i = 0; i < pointsArray.Length; i++)
@@ -120,6 +127,7 @@ public class WebCamPhotoCamera : MonoBehaviour
     
     void GetPointsVideo(string points)
     {
+        print("VIDEO");
         //разделить строку по разделителю ;
         string[] pointsArray = points.Split(';');
 
