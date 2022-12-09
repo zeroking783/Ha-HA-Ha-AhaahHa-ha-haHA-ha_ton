@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(WebCamPhotoCamera))]
 public class PointsCalculator : MonoBehaviour
@@ -8,6 +9,11 @@ public class PointsCalculator : MonoBehaviour
     private WebCamPhotoCamera webCamPhotoCamera;
     private float pointCalculationTimer = 1f;
     [SerializeField] private float acceptDistance = 0.1f;
+    [SerializeField] private float successRate = 0.5f;
+    public float life = 1f;
+    [SerializeField] private Image kaifometr;
+    
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -31,9 +37,17 @@ public class PointsCalculator : MonoBehaviour
                     correntPoints++;
                 }
             }
-            float correntPercent = (float) correntPoints / webCamPhotoCamera.bonesArrayVideo.Length * 100;
+            float correntPercent = (float) correntPoints / webCamPhotoCamera.bonesArrayVideo.Length;
             Debug.Log(correntPercent);
-            //какать здесь
+            if (correntPercent >= successRate)
+            {
+                life += 0.05f;
+            }
+            else
+            {
+                life -= 0.05f;
+            }
+            kaifometr.fillAmount = life;
         }   
     }
 }
