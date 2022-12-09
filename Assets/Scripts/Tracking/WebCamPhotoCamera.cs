@@ -17,6 +17,7 @@ public class WebCamPhotoCamera : MonoBehaviour
     [FormerlySerializedAs("bonesArray")] public Bone[] bonesArrayWebcam;
     public Bone[] bonesArrayVideo;
     private float timer = 0.5f;
+    private float pointCalculationTimer = 1f;
     private bool flazho4ek = false;
     private ZeroMQInstance zmqInstanceWebcam;
     private ZeroMQInstance zmqInstanceVideo;
@@ -68,7 +69,12 @@ public class WebCamPhotoCamera : MonoBehaviour
                 byte[] bytes = photo.EncodeToPNG();
                 zmqInstanceWebcam.Send(bytes);
             }
+        }
 
+        pointCalculationTimer -= Time.deltaTime;
+        if (pointCalculationTimer <= 0)
+        {
+            pointCalculationTimer = 1f;
             int correntPoints = 0;
             for (int i = 0; i < bonesArrayVideo.Length; i++)
             {
