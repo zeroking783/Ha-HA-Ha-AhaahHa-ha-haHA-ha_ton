@@ -17,7 +17,7 @@ public class ZeroMQInstance
     
     private Process _process;
     
-    public ZeroMQInstance(Action<string> callback)
+    public ZeroMQInstance(Action<string> callback, int port)
     {
         //run_cmd();
         
@@ -28,7 +28,7 @@ public class ZeroMQInstance
 
                 while (!pythonRunning)
                 {
-                    socket.Connect("tcp://localhost:5555");
+                    socket.Connect("tcp://localhost:" + port);
 
                     while (_isRunning)
                     {

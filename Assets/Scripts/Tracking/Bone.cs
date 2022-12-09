@@ -11,7 +11,7 @@ public class Bone : MonoBehaviour
     [SerializeField] private Transform[] drawRayTo;
     public void Update()
     {
-        transform.position = Vector3.Lerp(transform.position, position, 10*Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, position, 20*Time.deltaTime);
 
         GetComponent<MeshRenderer>().enabled = visibility > 0.01f;
         // foreach (var item in drawRayTo)

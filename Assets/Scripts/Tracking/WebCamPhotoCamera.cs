@@ -11,19 +11,21 @@ using NetMQ.Sockets;
 public class WebCamPhotoCamera : MonoBehaviour
 {
     WebCamTexture webCamTexture;
+    private RenderTexture videoTexture;
     public Bone[] bonesArray;
     private float timer = 0.5f;
     private ZeroMQInstance zmqInstance;
     
     void Start()
     {
-        zmqInstance = new ZeroMQInstance(GetPoints);
+        zmqInstance = new ZeroMQInstance(GetPoints, 5555);
         zmqInstance.Start();
         webCamTexture = new WebCamTexture();
         
         //Set resolurion to webCamTexture
         webCamTexture.requestedHeight = 500;
         webCamTexture.requestedWidth = 500;
+        //Set resolution to videoTexture
         
         GetComponent<Renderer>().material.mainTexture =
             webCamTexture; //Add Mesh Renderer to the GameObject to which this script is attached to
@@ -38,10 +40,13 @@ public class WebCamPhotoCamera : MonoBehaviour
             timer = 0.2f;
             
             
-            Texture2D photo = new Texture2D(webCamTexture.width, webCamTexture.height);
-            photo.SetPixels(webCamTexture.GetPixels());
-            photo.Apply();
-            byte[] bytes = photo.EncodeToPNG();
+            Texture2D tex = new Texture2D(videoTexture.width, videoTexture.height, TextureFormat.RGB24, false);
+            // ReadPixels looks at the active RenderTexture.
+            RenderTexture.active = videoTexture;
+            tex.ReadPixels(new Rect(0, 0, videoTexture.width,videoTexture.height), 0, 0);
+            tex.Apply(); 
+            
+            byte[] bytes = tex.EncodeToPNG();
 
             //отправить по сокету
             zmqInstance.Send(bytes);
