@@ -20,6 +20,7 @@ public class WebCamPhotoCamera : MonoBehaviour
     private bool flazho4ek = false;
     private ZeroMQInstance zmqInstanceWebcam;
     private ZeroMQInstance zmqInstanceVideo;
+    [SerializeField] private float acceptDistance = 0.1f;
     
     void Start()
     {
@@ -68,6 +69,18 @@ public class WebCamPhotoCamera : MonoBehaviour
                 zmqInstanceWebcam.Send(bytes);
             }
 
+            int correntPoints = 0;
+            for (int i = 0; i < bonesArrayVideo.Length; i++)
+            {
+                Bone webcamBone = bonesArrayWebcam[i];
+                Bone videoBone = bonesArrayVideo[i];
+                if (Vector3.Distance(webcamBone.transform.position, videoBone.transform.position) < acceptDistance)
+                {
+                    correntPoints++;
+                }
+            }
+            float correntPercent = (float) correntPoints / bonesArrayVideo.Length * 100;
+            Debug.Log(correntPercent);
         }
     }
 
